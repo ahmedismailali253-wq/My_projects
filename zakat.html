@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Calculateur de Zakat</title>
+<style>
+  :root{
+    --ink:#16281F;
+    --parchment:#F6F1E4;
+    --emerald:#0E4B3A;
+    --emerald-dark:#0A362A;
+    --gold:#C69A2E;
+    --gold-soft:#E8CE8A;
+    --red:#8C3B2E;
+    --line: rgba(22,40,31,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--parchment);
+    color:var(--ink);
+    font-family: 'Georgia', 'Iowan Old Style', serif;
+    line-height:1.5;
+  }
+  .wrap{
+    max-width:880px;
+    margin:0 auto;
+    padding:48px 24px 80px;
+  }
+  .star{
+    width:34px;height:34px;margin:0 auto 18px;
+    display:block;
+  }
+  header{
+    text-align:center;
+    margin-bottom:36px;
+  }
+  h1{
+    font-size:2.4rem;
+    letter-spacing:0.5px;
+    margin:0 0 6px;
+    color:var(--emerald-dark);
+    font-weight:600;
+  }
+  .subtitle{
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size:0.95rem;
+    color:#4d5b52;
+    letter-spacing:0.3px;
+  }
+  .divider{
+    display:flex;align-items:center;gap:14px;
+    margin:28px 0;
+  }
+  .divider::before,.divider::after{
+    content:"";flex:1;height:1px;background:var(--line);
+  }
+  .divider svg{flex-shrink:0;}
+
+  .card{
+    background:#FFFEFA;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:28px 30px;
+    margin-bottom:22px;
+    position:relative;
+  }
+  .card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--gold-soft), var(--gold), var(--gold-soft));
+  }
+  .card h2{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.8rem;
+    text-transform:uppercase;
+    letter-spacing:1.6px;
+    color:var(--emerald);
+    margin:0 0 4px;
+    font-weight:700;
+  }
+  .card p.hint{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.85rem;
+    color:#6b7568;
+    margin:0 0 18px;
+  }
+  .field{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    padding:10px 0;
+    border-bottom:1px dashed var(--line);
+  }
+  .field:last-child{border-bottom:none;}
+  .field label{
+    font-size:0.98rem;
+  }
+  .field input[type=number]{
+    width:160px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.95rem;
+    text-align:right;
+    background:#fff;
+    color:var(--ink);
+  }
+  .field input[type=number]:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 2px rgba(198,154,46,0.18);
+  }
+  .field small{
+    display:block;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.75rem;
+    color:#8a9188;
+    margin-top:2px;
+  }
+
+  .nisab-row{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .nisab-choice{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.9rem;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:#F0EAD8;
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .nisab-choice.active{
+    border-color:var(--gold);
+    background:var(--gold-soft);
+  }
+
+  button.calc{
+    display:block;
+    width:100%;
+    background:var(--emerald);
+    color:var(--parchment);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-weight:600;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    font-size:0.9rem;
+    padding:16px;
+    border:none;
+    border-radius:4px;
+    cursor:pointer;
+    margin-top:6px;
+    transition:background 0.15s ease;
+  }
+  button.calc:hover{background:var(--emerald-dark);}
+
+  .result{
+    margin-top:26px;
+    border:1px solid var(--gold);
+    background: linear-gradient(180deg, #FFFDF6, #FBF4E2);
+    border-radius:4px;
+    padding:30px;
+    text-align:center;
+    display:none;
+  }
+  .result.show{display:block;}
+  .result .badge{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.78rem;
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    color:var(--emerald);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .result .amount{
+    font-size:2.6rem;
+    color:var(--emerald-dark);
+    font-weight:700;
+    margin:6px 0 4px;
+  }
+  .result .detail{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.9rem;
+    color:#5a6459;
+  }
+  .result.negative .amount{color:var(--red);}
+  .breakdown{
+    margin-top:22px;
+    text-align:left;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.88rem;
+    color:#4d5b52;
+  }
+  .breakdown table{width:100%;border-collapse:collapse;}
+  .breakdown td{padding:6px 0;border-bottom:1px solid var(--line);}
+  .breakdown td:last-child{text-align:right;font-variant-numeric:tabular-nums;}
+  .breakdown tr.total td{font-weight:700;color:var(--ink);border-bottom:none;padding-top:12px;}
+
+  .info{
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.85rem;
+    color:#5a6459;
+    background:#F0EAD8;
+    border-radius:4px;
+    padding:18px 22px;
+    margin-top:26px;
+  }
+  .info h3{
+    font-family: 'Georgia', serif;
+    font-size:1rem;
+    color:var(--emerald-dark);
+    margin:0 0 8px;
+  }
+  .info ul{margin:0;padding-left:20px;}
+  .info li{margin-bottom:6px;}
+
+  footer{
+    text-align:center;
+    margin-top:40px;
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    font-size:0.78rem;
+    color:#8a9188;
+  }
+
+  @media (max-width:520px){
+    .field{flex-direction:column;align-items:flex-start;}
+    .field input[type=number]{width:100%;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <svg class="star" viewBox="0 0 100 100">
+      <polygon points="50,4 61,32 91,32 66,50 76,80 50,62 24,80 34,50 9,32 39,32"
+        fill="none" stroke="#C69A2E" stroke-width="2.5"/>
+    </svg>
+    <h1>Calculateur de Zakât</h1>
+    <div class="subtitle">Estimez la zakât due sur vos biens, selon les règles de la jurisprudence islamique</div>
+  </header>
+
+  <div class="divider">
+    <svg width="60" height="16" viewBox="0 0 60 16"><polygon points="30,1 34,8 30,15 26,8" fill="#C69A2E"/></svg>
+  </div>
+
+  <!-- Prix de référence -->
+  <div class="card">
+    <h2>Prix de référence</h2>
+    <p class="hint">Le nisâb (seuil minimum d'imposabilité) se calcule sur la valeur de l'or ou de l'argent au cours actuel.</p>
+    <div class="field">
+      <label>Prix de l'or (par gramme)</label>
+      <div><input type="number" id="goldPrice" value="60000" min="0"><small>en FCFA — nisâb : 85 g</small></div>
+    </div>
+    <div class="field">
+      <label>Prix de l'argent (par gramme)</label>
+      <div><input type="number" id="silverPrice" value="750" min="0"><small>en FCFA — nisâb : 595 g</small></div>
+    </div>
+    <div class="field">
+      <label>Base du nisâb à utiliser</label>
+      <div class="nisab-row">
+        <div class="nisab-choice active" data-nisab="silver">Argent (plus prudent)</div>
+        <div class="nisab-choice" data-nisab="gold">Or</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Biens soumis à 2.5% -->
+  <div class="card">
+    <h2>Biens soumis à la zakât (taux 2,5 %)</h2>
+    <p class="hint">Argent liquide, épargne, or, argent, actions, marchandises de commerce détenus depuis une année lunaire complète (hawl).</p>
+    <div class="field">
+      <label>Espèces et comptes d'épargne</label>
+      <div><input type="number" id="cash" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Or possédé (valeur totale)</label>
+      <div><input type="number" id="goldOwned" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Argent possédé (valeur totale)</label>
+      <div><input type="number" id="silverOwned" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Marchandises de commerce (valeur au prix de vente)</label>
+      <div><input type="number" id="tradeGoods" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Dettes qu'on vous doit (recouvrables)</label>
+      <div><input type="number" id="receivables" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Dettes que vous devez (à déduire)</label>
+      <div><input type="number" id="debts" value="0" min="0"></div>
+    </div>
+  </div>
+
+  <!-- Agricole -->
+  <div class="card">
+    <h2>Récoltes agricoles (taux variable)</h2>
+    <p class="hint">La zakât agricole ne dépend pas du hawl, mais de la récolte. Taux : 10 % si irrigation naturelle (pluie), 5 % si irrigation artificielle.</p>
+    <div class="field">
+      <label>Valeur de la récolte</label>
+      <div><input type="number" id="harvest" value="0" min="0"></div>
+    </div>
+    <div class="field">
+      <label>Type d'irrigation</label>
+      <div class="nisab-row">
+        <div class="nisab-choice active" data-irrig="natural">Pluie / naturelle (10 %)</div>
+        <div class="nisab-choice" data-irrig="artificial">Artificielle (5 %)</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="calc" onclick="calculerZakat()">Calculer la zakât due</button>
+
+  <div class="result" id="result">
+    <div class="badge">Résultat</div>
+    <div class="amount" id="amountText">0 FCFA</div>
+    <div class="detail" id="detailText"></div>
+    <div class="breakdown" id="breakdown"></div>
+  </div>
+
+  <div class="info">
+    <h3>Rappel des règles</h3>
+    <ul>
+      <li>La zakât n'est due que si le patrimoine dépasse le <strong>nisâb</strong> (seuil minimum) et est resté en possession pendant une année lunaire complète (<strong>hawl</strong>).</li>
+      <li>Le taux standard sur l'argent, l'or et les marchandises de commerce est de <strong>2,5 %</strong>.</li>
+      <li>Les dettes que vous devez à autrui peuvent être déduites de votre patrimoine net avant calcul.</li>
+      <li>Les récoltes suivent une règle différente : pas de hawl, mais un taux de 10 % ou 5 % selon l'irrigation.</li>
+      <li>Ce calculateur donne une estimation pédagogique ; pour un cas précis, il est recommandé de consulter un savant ou une association compétente.</li>
+    </ul>
+  </div>
+
+  <footer>Calculateur pédagogique — vérifiez toujours auprès d'une autorité religieuse compétente pour votre situation personnelle.</footer>
+</div>
+
+<script>
+let nisabBase = 'silver';
+let irrigType = 'natural';
+
+document.querySelectorAll('[data-nisab]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-nisab]').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    nisabBase = el.dataset.nisab;
+  });
+});
+document.querySelectorAll('[data-irrig]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-irrig]').forEach(e=>e.classList.remove('active'));
+    el.classList.add('active');
+    irrigType = el.dataset.irrig;
+  });
+});
+
+function num(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) ? 0 : v;
+}
+
+function fmt(n){
+  return Math.round(n).toLocaleString('fr-FR') + ' FCFA';
+}
+
+function calculerZakat(){
+  const goldPrice = num('goldPrice');
+  const silverPrice = num('silverPrice');
+  const nisabValue = nisabBase === 'gold' ? goldPrice*85 : silverPrice*595;
+
+  const cash = num('cash');
+  const goldOwned = num('goldOwned');
+  const silverOwned = num('silverOwned');
+  const tradeGoods = num('tradeGoods');
+  const receivables = num('receivables');
+  const debts = num('debts');
+
+  const grossWealth = cash + goldOwned + silverOwned + tradeGoods + receivables;
+  const netWealth = grossWealth - debts;
+
+  const harvest = num('harvest');
+  const harvestRate = irrigType === 'natural' ? 0.10 : 0.05;
+  const harvestZakat = harvest * harvestRate;
+
+  const resultEl = document.getElementById('result');
+  const amountEl = document.getElementById('amountText');
+  const detailEl = document.getElementById('detailText');
+  const breakdownEl = document.getElementById('breakdown');
+
+  resultEl.classList.remove('negative');
+
+  let rows = '';
+  let total = 0;
+
+  if (netWealth >= nisabValue && netWealth > 0) {
+    const wealthZakat = netWealth * 0.025;
+    total += wealthZakat;
+    rows += `<tr><td>Patrimoine net imposable</td><td>${fmt(netWealth)}</td></tr>`;
+    rows += `<tr><td>Zakât sur patrimoine (2,5 %)</td><td>${fmt(wealthZakat)}</td></tr>`;
+  } else if (netWealth > 0) {
+    rows += `<tr><td>Patrimoine net</td><td>${fmt(netWealth)}</td></tr>`;
+    rows += `<tr><td>Sous le nisâb (${fmt(nisabValue)}) — pas de zakât sur ce poste</td><td>—</td></tr>`;
+  }
+
+  if (harvest > 0) {
+    rows += `<tr><td>Récolte (taux ${irrigType==='natural'?'10 %':'5 %'})</td><td>${fmt(harvestZakat)}</td></tr>`;
+    total += harvestZakat;
+  }
+
+  rows += `<tr class="total"><td>Total zakât due</td><td>${fmt(total)}</td></tr>`;
+
+  amountEl.textContent = fmt(total);
+  if (netWealth < nisabValue && harvest === 0) {
+    detailEl.textContent = `Votre patrimoine (${fmt(netWealth)}) est sous le nisâb (${fmt(nisabValue)}). Aucune zakât n'est due sur ce poste.`;
+  } else {
+    detailEl.textContent = `Nisâb de référence (${nisabBase === 'gold' ? 'or, 85 g' : 'argent, 595 g'}) : ${fmt(nisabValue)}`;
+  }
+  breakdownEl.innerHTML = '<table>' + rows + '</table>';
+  resultEl.classList.add('show');
+  resultEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+</script>
+</body>
+</html>

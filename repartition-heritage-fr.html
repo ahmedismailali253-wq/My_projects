@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Répartition de l'héritage — Fara'id</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --encre:#1C231F;
+    --ivoire:#F6F1E4;
+    --panneau:#FFFDF7;
+    --vert:#0F3D3E;
+    --vert-fonce:#0A2C2D;
+    --or:#B08D57;
+    --or-doux:#DCC694;
+    --sauge:#DDE3D2;
+    --ligne:#D9CFB4;
+    --rouge:#8A3B2B;
+    --rayon:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ivoire);
+    color:var(--encre);
+    font-family:'Inter',sans-serif;
+    line-height:1.5;
+    background-image:
+      radial-gradient(circle at 100% 0%, rgba(176,141,87,0.08), transparent 40%),
+      radial-gradient(circle at 0% 100%, rgba(15,61,62,0.06), transparent 40%);
+  }
+  .application{max-width:1180px;margin:0 auto;padding:36px 24px 80px;}
+
+  /* ---------- En-tête ---------- */
+  header.entete{
+    text-align:center;
+    padding:18px 0 30px;
+    border-bottom:1px solid var(--ligne);
+    margin-bottom:34px;
+  }
+  .sur-titre{
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--or);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Amiri',serif;
+    font-weight:700;
+    font-size:clamp(30px,4vw,44px);
+    margin:0 0 8px;
+    color:var(--vert-fonce);
+  }
+  .sous-titre{
+    font-size:15px;
+    color:#5B5A4F;
+    max-width:620px;
+    margin:0 auto;
+  }
+  .separateur-etoile{
+    display:flex;
+    justify-content:center;
+    margin-top:20px;
+    opacity:.85;
+  }
+
+  /* ---------- Mise en page ---------- */
+  main{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start;}
+  @media (max-width:860px){ main{grid-template-columns:1fr;} }
+
+  .panneau{
+    background:var(--panneau);
+    border:1px solid var(--ligne);
+    border-radius:var(--rayon);
+    padding:26px;
+    position:relative;
+  }
+  .panneau::before{
+    content:"";
+    position:absolute; inset:6px;
+    border:1px solid rgba(176,141,87,0.25);
+    border-radius:calc(var(--rayon) - 4px);
+    pointer-events:none;
+  }
+  .panneau h2{
+    font-family:'Amiri',serif;
+    font-size:21px;
+    color:var(--vert-fonce);
+    margin:0 0 18px;
+    padding-bottom:10px;
+    border-bottom:1px dashed var(--ligne);
+  }
+
+  fieldset{border:none;padding:0;margin:0 0 20px;}
+  legend{
+    font-size:13px;
+    font-weight:600;
+    color:var(--vert);
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin-bottom:10px;
+    padding:0;
+  }
+  .champ{margin-bottom:14px;}
+  .champ label{
+    display:block;
+    font-size:13.5px;
+    font-weight:500;
+    color:#3C4038;
+    margin-bottom:5px;
+  }
+  .ligne2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  input[type=number], input[type=text]{
+    width:100%;
+    padding:9px 11px;
+    border:1px solid var(--ligne);
+    border-radius:8px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    background:#fff;
+    color:var(--encre);
+  }
+  input[type=number]:focus, input[type=text]:focus{
+    outline:2px solid var(--or-doux);
+    outline-offset:1px;
+    border-color:var(--or);
+  }
+  .groupe-bascule{display:flex;gap:8px;}
+  .bouton-bascule{
+    flex:1;
+    padding:9px 10px;
+    border:1px solid var(--ligne);
+    background:#fff;
+    border-radius:8px;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+    color:#6b6b5f;
+    transition:all .15s ease;
+    text-align:center;
+  }
+  .bouton-bascule.actif{
+    background:var(--vert);
+    border-color:var(--vert);
+    color:#fff;
+  }
+  .ligne-case{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:8px 0;
+    border-bottom:1px solid #F0EAD8;
+  }
+  .ligne-case:last-child{border-bottom:none;}
+  .ligne-case input[type=checkbox]{
+    width:17px;height:17px;
+    accent-color:var(--vert);
+  }
+  .ligne-case label{font-size:14px;color:var(--encre);cursor:pointer;flex:1;}
+  .indice{font-size:11.5px;color:#8a8776;margin-top:2px;}
+
+  button#bouton-calculer{
+    width:100%;
+    padding:13px;
+    background:var(--vert-fonce);
+    color:#fff;
+    border:none;
+    border-radius:9px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  button#bouton-calculer:hover{background:var(--vert);}
+
+  /* ---------- Résultats ---------- */
+  #resultats-vide{
+    color:#8a8776;
+    font-size:14.5px;
+    padding:30px 10px;
+    text-align:center;
+  }
+  .carte-heritier{
+    display:grid;
+    grid-template-columns:1fr auto auto;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px;
+    border:1px solid var(--ligne);
+    border-radius:10px;
+    margin-bottom:10px;
+    background:#fff;
+  }
+  .carte-heritier .nom{font-weight:600;font-size:14.5px;color:var(--encre);}
+  .carte-heritier .regle{font-size:12px;color:#8a8776;margin-top:3px;}
+  .carte-heritier .fraction{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:16px;
+    color:var(--vert-fonce);
+    text-align:right;
+  }
+  .carte-heritier .pourcentage{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--or);
+    text-align:right;
+    min-width:56px;
+  }
+  .carte-heritier .montant{
+    grid-column:1/-1;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--rouge);
+    margin-top:2px;
+  }
+  .barre-conteneur{
+    height:8px;
+    background:var(--sauge);
+    border-radius:6px;
+    overflow:hidden;
+    margin:18px 0 22px;
+    display:flex;
+  }
+  .segment-barre{height:100%;}
+  .ligne-total{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    color:#5B5A4F;
+    margin-bottom:14px;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .encadre-regles{
+    margin-top:24px;
+    padding:16px 18px;
+    background:var(--sauge);
+    border-radius:10px;
+    border-left:3px solid var(--vert);
+  }
+  .encadre-regles h3{
+    font-family:'Amiri',serif;
+    font-size:16px;
+    margin:0 0 10px;
+    color:var(--vert-fonce);
+  }
+  .encadre-regles ul{margin:0;padding-left:18px;font-size:13.5px;color:#3C4038;}
+  .encadre-regles li{margin-bottom:6px;}
+
+  footer.avertissement{
+    margin-top:34px;
+    font-size:12px;
+    color:#9a9788;
+    text-align:center;
+    line-height:1.7;
+    max-width:760px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+</style>
+</head>
+<body>
+<div class="application">
+
+  <header class="entete">
+    <div class="sur-titre">Fara'id · Droit successoral musulman</div>
+    <h1>Répartition interactive de l'héritage</h1>
+    <p class="sous-titre">Renseignez la composition familiale du défunt pour obtenir la répartition des parts selon les règles classiques du Fara'id, avec l'explication de chaque règle appliquée.</p>
+    <div class="separateur-etoile">
+      <svg width="120" height="20" viewBox="0 0 120 20">
+        <line x1="0" y1="10" x2="42" y2="10" stroke="#B08D57" stroke-width="1"/>
+        <g transform="translate(60,10)" fill="none" stroke="#B08D57" stroke-width="1.2">
+          <path d="M0,-8 L2.3,-2.3 L8,0 L2.3,2.3 L0,8 L-2.3,2.3 L-8,0 L-2.3,-2.3 Z"/>
+        </g>
+        <line x1="78" y1="10" x2="120" y2="10" stroke="#B08D57" stroke-width="1"/>
+      </svg>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= FORMULAIRE ================= -->
+    <section class="panneau">
+      <h2>Composition familiale</h2>
+
+      <fieldset>
+        <legend>Défunt(e)</legend>
+        <div class="champ">
+          <label>Sexe du défunt</label>
+          <div class="groupe-bascule" id="bascule-genre">
+            <button type="button" class="bouton-bascule actif" data-valeur="homme">Homme</button>
+            <button type="button" class="bouton-bascule" data-valeur="femme">Femme</button>
+          </div>
+        </div>
+        <div class="champ">
+          <label for="succession">Montant net de la succession (FCFA) — optionnel</label>
+          <input type="number" id="succession" min="0" placeholder="ex : 5 000 000">
+          <div class="indice">Après règlement des dettes, frais funéraires et éventuel legs (wasiyya, max 1/3).</div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Conjoint(e)</legend>
+        <div class="champ" id="champ-epouses">
+          <label for="epouses">Nombre d'épouses survivantes</label>
+          <input type="number" id="epouses" min="0" max="4" value="0">
+        </div>
+        <div class="champ" id="champ-epoux" style="display:none;">
+          <div class="ligne-case">
+            <input type="checkbox" id="epoux">
+            <label for="epoux">Époux survivant</label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Ascendants</legend>
+        <div class="ligne-case"><input type="checkbox" id="pere"><label for="pere">Père vivant</label></div>
+        <div class="ligne-case"><input type="checkbox" id="mere"><label for="mere">Mère vivante</label></div>
+        <div class="ligne-case"><input type="checkbox" id="grand-pere"><label for="grand-pere">Grand-père paternel vivant</label></div>
+        <div class="ligne-case"><input type="checkbox" id="grand-mere"><label for="grand-mere">Grand-mère vivante</label></div>
+        <div class="indice">Les grands-parents ne comptent que si le parent correspondant (père / mère) est décédé.</div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Descendants</legend>
+        <div class="ligne2">
+          <div class="champ"><label for="fils">Fils</label><input type="number" id="fils" min="0" value="0"></div>
+          <div class="champ"><label for="filles">Filles</label><input type="number" id="filles" min="0" value="0"></div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Frères et sœurs germains</legend>
+        <div class="ligne2">
+          <div class="champ"><label for="freres">Frères germains</label><input type="number" id="freres" min="0" value="0"></div>
+          <div class="champ"><label for="soeurs">Sœurs germaines</label><input type="number" id="soeurs" min="0" value="0"></div>
+        </div>
+        <div class="indice">Frères/sœurs de mêmes père et mère. Ils sont exclus si le père (ou grand-père) ou un fils est vivant.</div>
+      </fieldset>
+
+      <button id="bouton-calculer">Calculer la répartition</button>
+    </section>
+
+    <!-- ================= RÉSULTATS ================= -->
+    <section class="panneau">
+      <h2>Répartition obtenue</h2>
+      <div id="resultats-vide">Renseignez les héritiers puis cliquez sur « Calculer la répartition ».</div>
+      <div id="resultats-contenu" style="display:none;">
+        <div class="barre-conteneur" id="barre-conteneur"></div>
+        <div class="ligne-total"><span>Total attribué</span><span id="total-valeur"></span></div>
+        <div id="liste-heritiers"></div>
+        <div class="encadre-regles" id="encadre-regles" style="display:none;">
+          <h3>Règles appliquées</h3>
+          <ul id="liste-regles"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="avertissement">
+    Cet outil applique une modélisation pédagogique simplifiée des règles majoritaires du Fara'id (parts fixées, 'asaba, 'awl, radd) pour les configurations familiales les plus courantes. Il ne couvre pas tous les cas particuliers (frères/sœurs consanguins ou utérins, kalala complexe, divergences entre écoles juridiques). Pour une succession réelle, consultez un savant qualifié ou un notaire.
+  </footer>
+</div>
+
+<script>
+/* ---------- Arithmétique des fractions ---------- */
+function pgcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){[a,b]=[b,a%b];}return a||1;}
+function simplifier(f){ if(f.n===0) return {n:0,d:1}; const g=pgcd(f.n,f.d); return {n:f.n/g, d:f.d/g}; }
+function Frac(n,d){ return simplifier({n,d}); }
+function addition(a,b){ return simplifier({n:a.n*b.d + b.n*a.d, d:a.d*b.d}); }
+function soustraction(a,b){ return simplifier({n:a.n*b.d - b.n*a.d, d:a.d*b.d}); }
+function multiplication(a,b){ return simplifier({n:a.n*b.n, d:a.d*b.d}); }
+function versDecimal(a){ return a.n/a.d; }
+function comparer(a,b){ return a.n*b.d - b.n*a.d; }
+
+/* ---------- Moteur de calcul Fara'id ---------- */
+function calculer(donnees){
+  const {genre, nombreEpouses, epouxVivant, pereVivant, mereVivante,
+         grandPereVivant, grandMereVivante, fils, filles, freres, soeurs} = donnees;
+  const aDesEnfants = fils>0 || filles>0;
+  const nombreFreresSoeurs = freres+soeurs;
+
+  let heritiers = [];
+  let sommeFixe = Frac(0,1);
+  let regles = [];
+
+  // Conjoint
+  let partConjoint = Frac(0,1);
+  if(genre==='homme' && nombreEpouses>0){
+    partConjoint = aDesEnfants ? Frac(1,8) : Frac(1,4);
+    heritiers.push({cle:'conjoint', nom: nombreEpouses>1?`Épouses (${nombreEpouses})`:'Épouse', fraction: partConjoint, nombre: nombreEpouses, estConjoint:true,
+      regle: aDesEnfants ? "1/8 (présence de descendants), à partager entre les épouses" : "1/4 (aucun descendant), à partager entre les épouses"});
+    sommeFixe = addition(sommeFixe, partConjoint);
+  } else if(genre==='femme' && epouxVivant){
+    partConjoint = aDesEnfants ? Frac(1,4) : Frac(1,2);
+    heritiers.push({cle:'conjoint', nom:'Époux', fraction: partConjoint, nombre:1, estConjoint:true,
+      regle: aDesEnfants ? "1/4 (présence de descendants)" : "1/2 (aucun descendant)"});
+    sommeFixe = addition(sommeFixe, partConjoint);
+  }
+
+  const pereActif = pereVivant;
+  const grandPereActif = !pereVivant && grandPereVivant;
+
+  // Mère / grand-mère
+  let partMere = Frac(0,1);
+  if(mereVivante){
+    if(aDesEnfants || nombreFreresSoeurs>=2){
+      partMere = Frac(1,6);
+      heritiers.push({cle:'mere', nom:'Mère', fraction: partMere, nombre:1, regle:"1/6 (présence de descendants ou d'au moins 2 frères/sœurs)"});
+    } else if(pereActif && partConjoint.n>0 && !aDesEnfants){
+      const reste = soustraction(Frac(1,1), partConjoint);
+      partMere = multiplication(reste, Frac(1,3));
+      heritiers.push({cle:'mere', nom:'Mère', fraction: partMere, nombre:1, regle:"1/3 du reliquat après la part du conjoint (cas dit gharrâwayn)"});
+      regles.push("Cas gharrâwayn : en présence du père, du conjoint, sans descendant ni pluralité de frères/sœurs, la mère reçoit 1/3 du reliquat (et non 1/3 de la succession) afin que le père reçoive le double.");
+    } else {
+      partMere = Frac(1,3);
+      heritiers.push({cle:'mere', nom:'Mère', fraction: partMere, nombre:1, regle:"1/3 (aucun descendant, moins de 2 frères/sœurs)"});
+    }
+    sommeFixe = addition(sommeFixe, partMere);
+  } else if(grandMereVivante){
+    partMere = Frac(1,6);
+    heritiers.push({cle:'grand-mere', nom:'Grand-mère', fraction: partMere, nombre:1, regle:"1/6 (la mère est décédée)"});
+    sommeFixe = addition(sommeFixe, partMere);
+  }
+
+  // Père / grand-père
+  let partPereFixe = Frac(0,1);
+  let pereEstAsaba = false;
+  if(pereActif){
+    if(aDesEnfants){
+      partPereFixe = Frac(1,6);
+      sommeFixe = addition(sommeFixe, partPereFixe);
+      pereEstAsaba = (fils===0);
+      heritiers.push({cle:'pere', nom:'Père', fraction: partPereFixe, nombre:1, asaba:pereEstAsaba,
+        regle: pereEstAsaba ? "1/6 fixe + reliquat en tant qu'agnat ('asaba), car il n'y a pas de fils" : "1/6 fixe, car un fils est présent (le fils recueille le reliquat)"});
+    } else {
+      pereEstAsaba = true;
+      heritiers.push({cle:'pere', nom:'Père', fraction: Frac(0,1), nombre:1, asaba:true, regle:"Agnat ('asaba) : reçoit tout le reliquat (aucun descendant)"});
+    }
+  } else if(grandPereActif){
+    if(aDesEnfants){
+      partPereFixe = Frac(1,6);
+      sommeFixe = addition(sommeFixe, partPereFixe);
+      pereEstAsaba = (fils===0);
+      heritiers.push({cle:'grand-pere', nom:'Grand-père paternel', fraction: partPereFixe, nombre:1, asaba:pereEstAsaba,
+        regle: pereEstAsaba ? "1/6 fixe + reliquat comme agnat (remplace le père, absent)" : "1/6 fixe, un fils recueille le reliquat"});
+    } else {
+      pereEstAsaba = true;
+      heritiers.push({cle:'grand-pere', nom:'Grand-père paternel', fraction: Frac(0,1), nombre:1, asaba:true, regle:"Agnat ('asaba), remplace le père absent"});
+    }
+    regles.push("Le grand-père paternel n'hérite qu'en l'absence du père, et se voit ici attribuer le même traitement que le père (simplification : les écoles juridiques divergent sur son interaction avec les frères/sœurs).");
+  }
+
+  // Filles (part fixe) si aucun fils
+  let partFillesFard = Frac(0,1);
+  if(fils===0 && filles>0){
+    partFillesFard = filles===1 ? Frac(1,2) : Frac(2,3);
+    sommeFixe = addition(sommeFixe, partFillesFard);
+    heritiers.push({cle:'filles', nom: filles>1?`Filles (${filles})`:'Fille', fraction: partFillesFard, nombre: filles,
+      regle: filles===1 ? "1/2 (fille unique, aucun fils)" : "2/3 à partager entre elles (2 filles ou plus, aucun fils)"});
+  }
+
+  const filsFillesAsaba = fils>0;
+
+  // Frères et sœurs
+  const freresSoeursExclus = pereActif || grandPereActif || fils>0;
+  let soeursAsabaMaalGhair = false;
+  let freresSoeursAsaba = false;
+  if(freresSoeursExclus && nombreFreresSoeurs>0){
+    let cause = fils>0 ? "un fils est présent" : (pereActif ? "le père est vivant" : "le grand-père paternel est vivant");
+    regles.push(`Les frères et sœurs germains sont exclus de l'héritage (hajb) car ${cause}.`);
+  } else if(!freresSoeursExclus){
+    if(freres>0){
+      freresSoeursAsaba = true;
+      heritiers.push({cle:'freres-soeurs', nom:`Frères (${freres})${soeurs>0?` et sœurs (${soeurs})`:''} germains`, fraction: Frac(0,1), asaba:true,
+        freres, soeurs, regle:"Agnats ('asaba) : recueillent le reliquat, réparti à raison de 2 parts par frère pour 1 part par sœur"});
+    } else if(soeurs>0){
+      if(filles>0 && fils===0){
+        soeursAsabaMaalGhair = true;
+        heritiers.push({cle:'soeurs', nom: soeurs>1?`Sœurs (${soeurs})`:'Sœur', fraction: Frac(0,1), asaba:true, nombre:soeurs,
+          regle:"Agnates par un tiers (asaba ma'al ghayr) : en présence de filles et sans fils ni père, les sœurs germaines recueillent le reliquat au lieu de leur part fixe"});
+        regles.push("Règle « asaba ma'al ghayr » : en présence de filles (sans fils ni père), les sœurs germaines passent de part fixe à agnates et recueillent le reliquat.");
+      } else {
+        const partSoeursFard = soeurs===1? Frac(1,2): Frac(2,3);
+        sommeFixe = addition(sommeFixe, partSoeursFard);
+        heritiers.push({cle:'soeurs', nom: soeurs>1?`Sœurs (${soeurs})`:'Sœur', fraction: partSoeursFard, nombre: soeurs,
+          regle: soeurs===1 ? "1/2 (sœur unique, aucun frère)" : "2/3 à partager entre elles (2 sœurs ou plus, aucun frère)"});
+      }
+    }
+  }
+
+  const asabaActif = filsFillesAsaba || pereEstAsaba || freresSoeursAsaba || soeursAsabaMaalGhair;
+
+  let mode = 'normal';
+
+  if(heritiers.length===0){
+    return {heritiers:[], mode:'aucun', regles};
+  }
+
+  if(comparer(sommeFixe, Frac(1,1)) >= 0){
+    mode = 'awl';
+    heritiers.forEach(h=>{ h.fractionFinale = simplifier({n:h.fraction.n*sommeFixe.d, d:h.fraction.d*sommeFixe.n}); });
+    if(comparer(sommeFixe, Frac(1,1)) > 0){
+      regles.push(`Cas d'al-'awl (augmentation) : la somme des parts fixes (${sommeFixe.n}/${sommeFixe.d}) dépasse l'unité de la succession. Toutes les parts fixes ont été réduites proportionnellement pour que le total revienne à 1.`);
+    }
+  } else {
+    const reliquat = soustraction(Frac(1,1), sommeFixe);
+    if(asabaActif){
+      if(filsFillesAsaba){
+        const unites = fils*2 + filles;
+        heritiers.push({cle:'fils', nom: fils>1?`Fils (${fils})`:'Fils', nombre: fils, asaba:true,
+          regle:"Agnats : recueillent le reliquat, 2 parts par fils contre 1 part par fille",
+          fractionFinale: multiplication(reliquat, Frac(2*fils, unites))});
+        const partFilles = multiplication(reliquat, Frac(filles, unites));
+        const entreeFilles = heritiers.find(h=>h.cle==='filles');
+        if(entreeFilles){ entreeFilles.fractionFinale = partFilles; entreeFilles.asaba = true; entreeFilles.regle = "Devient agnate avec le(s) fils : 1 part pour 2 parts de fils"; }
+        else if(filles>0){ heritiers.push({cle:'filles', nom:`Filles (${filles})`, nombre:filles, asaba:true, fractionFinale:partFilles, regle:"Agnate avec le(s) fils"}); }
+      } else if(pereEstAsaba){
+        const cle = pereActif?'pere':'grand-pere';
+        const h = heritiers.find(x=>x.cle===cle);
+        h.fractionFinale = addition(h.fraction, reliquat);
+      } else if(freresSoeursAsaba){
+        const h = heritiers.find(x=>x.cle==='freres-soeurs');
+        h.fractionFinale = reliquat;
+        h.unites = freres*2 + soeurs;
+      } else if(soeursAsabaMaalGhair){
+        const h = heritiers.find(x=>x.cle==='soeurs');
+        h.fractionFinale = reliquat;
+      }
+      heritiers.forEach(h=>{ if(h.fractionFinale===undefined) h.fractionFinale = h.fraction; });
+    } else if(reliquat.n>0){
+      mode = 'radd';
+      const partsFixesNonConjoint = heritiers.filter(h=>!h.estConjoint && !h.asaba);
+      if(partsFixesNonConjoint.length>0){
+        const sommeNonConjoint = partsFixesNonConjoint.reduce((acc,h)=>addition(acc,h.fraction), Frac(0,1));
+        heritiers.forEach(h=>{
+          if(!h.estConjoint && !h.asaba){
+            const ratio = simplifier({n:h.fraction.n*sommeNonConjoint.d, d:h.fraction.d*sommeNonConjoint.n});
+            h.fractionFinale = addition(h.fraction, multiplication(reliquat, ratio));
+          } else { h.fractionFinale = h.fraction; }
+        });
+        regles.push("Cas d'ar-radd (retour) : il n'y a aucun héritier agnat pour recueillir le reliquat. Celui-ci a été redistribué proportionnellement entre les héritiers à parts fixes, à l'exclusion du conjoint.");
+      } else {
+        heritiers.forEach(h=>{ h.fractionFinale = addition(h.fraction, reliquat); });
+        regles.push("Aucun héritier agnat ni autre parent à parts fixes en dehors du conjoint : le reliquat lui a été attribué par défaut (à défaut d'héritiers plus éloignés pris en compte par cet outil).");
+      }
+    } else {
+      heritiers.forEach(h=>{ if(h.fractionFinale===undefined) h.fractionFinale = h.fraction; });
+    }
+  }
+
+  heritiers.forEach(h=>{ if(h.fractionFinale===undefined) h.fractionFinale = h.fraction; });
+  return {heritiers, mode, regles};
+}
+
+/* ---------- Câblage de l'interface ---------- */
+const basculeGenre = document.getElementById('bascule-genre');
+let genreActuel = 'homme';
+basculeGenre.querySelectorAll('.bouton-bascule').forEach(bouton=>{
+  bouton.addEventListener('click', ()=>{
+    basculeGenre.querySelectorAll('.bouton-bascule').forEach(b=>b.classList.remove('actif'));
+    bouton.classList.add('actif');
+    genreActuel = bouton.dataset.valeur;
+    document.getElementById('champ-epouses').style.display = genreActuel==='homme' ? 'block' : 'none';
+    document.getElementById('champ-epoux').style.display = genreActuel==='femme' ? 'block' : 'none';
+  });
+});
+
+const palette = ['#0F3D3E','#B08D57','#8A3B2B','#5B7B6E','#C9A66B','#3C4038','#7A5C3E','#4E6B5C'];
+
+function valeur(id){ return document.getElementById(id).value; }
+function coche(id){ return document.getElementById(id).checked; }
+
+document.getElementById('bouton-calculer').addEventListener('click', ()=>{
+  const donnees = {
+    genre: genreActuel,
+    nombreEpouses: genreActuel==='homme' ? Math.max(0, parseInt(valeur('epouses'))||0) : 0,
+    epouxVivant: genreActuel==='femme' ? coche('epoux') : false,
+    pereVivant: coche('pere'),
+    mereVivante: coche('mere'),
+    grandPereVivant: coche('grand-pere'),
+    grandMereVivante: coche('grand-mere'),
+    fils: Math.max(0, parseInt(valeur('fils'))||0),
+    filles: Math.max(0, parseInt(valeur('filles'))||0),
+    freres: Math.max(0, parseInt(valeur('freres'))||0),
+    soeurs: Math.max(0, parseInt(valeur('soeurs'))||0),
+  };
+
+  const resultat = calculer(donnees);
+  const zoneVide = document.getElementById('resultats-vide');
+  const zoneContenu = document.getElementById('resultats-contenu');
+  const liste = document.getElementById('liste-heritiers');
+  const barreConteneur = document.getElementById('barre-conteneur');
+  const encadreRegles = document.getElementById('encadre-regles');
+  const listeRegles = document.getElementById('liste-regles');
+
+  liste.innerHTML = '';
+  barreConteneur.innerHTML = '';
+  listeRegles.innerHTML = '';
+
+  if(resultat.heritiers.length===0){
+    zoneVide.style.display='block';
+    zoneVide.textContent = "Aucun héritier n'a été renseigné. Cochez ou saisissez au moins un héritier.";
+    zoneContenu.style.display='none';
+    return;
+  }
+  zoneVide.style.display='none';
+  zoneContenu.style.display='block';
+
+  const succession = parseFloat(valeur('succession'))||0;
+  let total = Frac(0,1);
+
+  resultat.heritiers.forEach((h,i)=>{
+    total = addition(total, h.fractionFinale);
+    const pourcentage = versDecimal(h.fractionFinale)*100;
+    const couleur = palette[i % palette.length];
+
+    const segment = document.createElement('div');
+    segment.className='segment-barre';
+    segment.style.width = pourcentage.toFixed(2)+'%';
+    segment.style.background = couleur;
+    barreConteneur.appendChild(segment);
+
+    const carte = document.createElement('div');
+    carte.className='carte-heritier';
+    carte.style.borderLeft = `3px solid ${couleur}`;
+    let montantHtml = '';
+    if(succession>0){
+      const montant = succession * versDecimal(h.fractionFinale);
+      montantHtml = `<div class="montant">≈ ${Math.round(montant).toLocaleString('fr-FR')} FCFA${h.nombre>1?` &nbsp;·&nbsp; ${Math.round(montant/h.nombre).toLocaleString('fr-FR')} FCFA / personne`:''}</div>`;
+    }
+    carte.innerHTML = `
+      <div>
+        <div class="nom">${h.nom}</div>
+        <div class="regle">${h.regle || (h.asaba ? "Reliquat en tant qu'agnat" : '')}</div>
+      </div>
+      <div class="fraction">${h.fractionFinale.n}/${h.fractionFinale.d}</div>
+      <div class="pourcentage">${pourcentage.toFixed(1)}%</div>
+      ${montantHtml}
+    `;
+    liste.appendChild(carte);
+  });
+
+  document.getElementById('total-valeur').textContent = `${total.n}/${total.d}  (${(versDecimal(total)*100).toFixed(1)}%)`;
+
+  if(resultat.regles.length>0){
+    encadreRegles.style.display='block';
+    resultat.regles.forEach(r=>{
+      const li=document.createElement('li');
+      li.textContent=r;
+      listeRegles.appendChild(li);
+    });
+  } else {
+    encadreRegles.style.display='none';
+  }
+});
+</script>
+</body>
+</html>
