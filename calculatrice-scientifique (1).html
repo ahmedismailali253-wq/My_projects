@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculatrice scientifique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --casing: #2b2f31;
+    --casing-edge: #202325;
+    --panel: #14181a;
+    --panel-glow: #f2a93c;
+    --key-bg: #3c4144;
+    --key-bg-hover: #464c4f;
+    --key-op: #4a3a24;
+    --key-op-hover: #5a4629;
+    --key-fn: #33383a;
+    --ivory: #eae7df;
+    --muted: #8c9194;
+    --danger: #a1503f;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: #16181a;
+    font-family:'Inter', sans-serif;
+    padding: 24px;
+  }
+  .device{
+    width: 400px;
+    max-width: 100%;
+    background: linear-gradient(180deg, var(--casing), var(--casing-edge));
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+  .brand-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 2px 6px 12px;
+  }
+  .brand{
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .mode-toggle{
+    display:flex;
+    background: var(--casing-edge);
+    border-radius: 20px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .mode-toggle button{
+    border:none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-family:'JetBrains Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 16px;
+    cursor:pointer;
+  }
+  .mode-toggle button.active{
+    background: var(--panel-glow);
+    color: #2b2000;
+    font-weight: 700;
+  }
+  .display{
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    min-height: 96px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    gap: 6px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .expr{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: var(--muted);
+    min-height: 18px;
+    word-break: break-all;
+    text-align:right;
+  }
+  .result{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--panel-glow);
+    text-shadow: 0 0 12px rgba(242,169,60,0.35);
+    text-align:right;
+    word-break: break-all;
+    line-height: 1.1;
+  }
+  .keys{
+    display:grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  button.key{
+    border:none;
+    border-radius: 10px;
+    background: var(--key-fn);
+    color: var(--ivory);
+    font-family:'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 12px 0;
+    cursor:pointer;
+    transition: background 0.12s ease, transform 0.05s ease;
+  }
+  button.key:active{
+    transform: scale(0.95);
+  }
+  button.key.num{
+    background: var(--key-bg);
+    font-size: 16px;
+  }
+  button.key.num:hover{ background: var(--key-bg-hover); }
+  button.key.op{
+    background: var(--key-op);
+    color: var(--panel-glow);
+  }
+  button.key.op:hover{ background: var(--key-op-hover); }
+  button.key.wide{
+    grid-column: span 2;
+  }
+  button.key.clear{
+    color: var(--danger);
+  }
+  .footer-note{
+    text-align:center;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 14px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="brand-row">
+    <span class="brand">Modèle SC-100</span>
+    <div class="mode-toggle">
+      <button id="btn-deg" class="active">DEG</button>
+      <button id="btn-rad">RAD</button>
+    </div>
+  </div>
+
+  <div class="display">
+    <div class="expr" id="expr">&nbsp;</div>
+    <div class="result" id="result">0</div>
+  </div>
+
+  <div class="keys" id="keys">
+    <button class="key clear" data-action="clear">AC</button>
+    <button class="key" data-action="del">DEL</button>
+    <button class="key" data-value="(">(</button>
+    <button class="key" data-value=")">)</button>
+    <button class="key op" data-value="%">%</button>
+
+    <button class="key" data-value="sin(">sin</button>
+    <button class="key" data-value="cos(">cos</button>
+    <button class="key" data-value="tan(">tan</button>
+    <button class="key" data-value="log(">log</button>
+    <button class="key" data-value="ln(">ln</button>
+
+    <button class="key" data-value="sqrt(">√</button>
+    <button class="key" data-action="square">x²</button>
+    <button class="key" data-value="^">x^y</button>
+    <button class="key" data-value="pi">π</button>
+    <button class="key" data-value="e">e</button>
+
+    <button class="key num" data-value="7">7</button>
+    <button class="key num" data-value="8">8</button>
+    <button class="key num" data-value="9">9</button>
+    <button class="key" data-action="inv">1/x</button>
+    <button class="key op" data-value="/">÷</button>
+
+    <button class="key num" data-value="4">4</button>
+    <button class="key num" data-value="5">5</button>
+    <button class="key num" data-value="6">6</button>
+    <button class="key" data-action="negate">±</button>
+    <button class="key op" data-value="*">×</button>
+
+    <button class="key num" data-value="1">1</button>
+    <button class="key num" data-value="2">2</button>
+    <button class="key num" data-value="3">3</button>
+    <button class="key" data-value=".">.</button>
+    <button class="key op" data-value="-">−</button>
+
+    <button class="key num wide" data-value="0">0</button>
+    <button class="key op" data-value="+">+</button>
+    <button class="key op wide" data-action="equals">=</button>
+  </div>
+
+  <div class="footer-note">Ahmed — Licence 1 Big Data · DIT</div>
+</div>
+
+<script>
+  const exprEl = document.getElementById('expr');
+  const resultEl = document.getElementById('result');
+  const keysEl = document.getElementById('keys');
+  const btnDeg = document.getElementById('btn-deg');
+  const btnRad = document.getElementById('btn-rad');
+
+  let expression = '';
+  let angleMode = 'deg';
+
+  function setAngleMode(mode){
+    angleMode = mode;
+    btnDeg.classList.toggle('active', mode === 'deg');
+    btnRad.classList.toggle('active', mode === 'rad');
+  }
+  btnDeg.addEventListener('click', () => setAngleMode('deg'));
+  btnRad.addEventListener('click', () => setAngleMode('rad'));
+
+  function toRad(x){ return angleMode === 'deg' ? x * Math.PI / 180 : x; }
+
+  function updateDisplay(){
+    exprEl.textContent = expression.length ? expression : '\u00a0';
+  }
+
+  function sanitizeForEval(raw){
+    let s = raw;
+    s = s.replace(/\^/g, '**');
+    s = s.replace(/pi/g, 'PI');
+    s = s.replace(/sqrt\(/g, 'sqrt(');
+    return s;
+  }
+
+  function evaluateExpression(raw){
+    const sin = x => Math.sin(toRad(x));
+    const cos = x => Math.cos(toRad(x));
+    const tan = x => Math.tan(toRad(x));
+    const log = x => Math.log10(x);
+    const ln = x => Math.log(x);
+    const sqrt = x => Math.sqrt(x);
+    const PI = Math.PI;
+    const e = Math.E;
+
+    let s = sanitizeForEval(raw);
+    if (!s.length) return 0;
+
+    // eslint-disable-next-line no-new-func
+    const fn = new Function('sin','cos','tan','log','ln','sqrt','PI','e',
+      'return (' + s + ')');
+    return fn(sin, cos, tan, log, ln, sqrt, PI, e);
+  }
+
+  function formatNumber(n){
+    if (typeof n !== 'number' || !isFinite(n)) return 'Erreur';
+    if (Number.isInteger(n)) return n.toString();
+    return parseFloat(n.toFixed(10)).toString();
+  }
+
+  function tryLivePreview(){
+    if (!expression.length){
+      resultEl.textContent = '0';
+      return;
+    }
+    try {
+      const val = evaluateExpression(expression);
+      resultEl.textContent = formatNumber(val);
+    } catch(e){
+      resultEl.textContent = expression.slice(-1).match(/[0-9)]/) ? resultEl.textContent : resultEl.textContent;
+    }
+  }
+
+  keysEl.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button.key');
+    if (!btn) return;
+    const value = btn.dataset.value;
+    const action = btn.dataset.action;
+
+    if (value !== undefined){
+      expression += value;
+      updateDisplay();
+      tryLivePreview();
+      return;
+    }
+
+    switch(action){
+      case 'clear':
+        expression = '';
+        resultEl.textContent = '0';
+        updateDisplay();
+        break;
+      case 'del':
+        expression = expression.slice(0, -1);
+        updateDisplay();
+        tryLivePreview();
+        break;
+      case 'equals':
+        try {
+          const val = evaluateExpression(expression);
+          resultEl.textContent = formatNumber(val);
+          expression = formatNumber(val);
+          updateDisplay();
+        } catch(e){
+          resultEl.textContent = 'Erreur';
+        }
+        break;
+      case 'square':
+        expression += '^2';
+        updateDisplay();
+        tryLivePreview();
+        break;
+      case 'inv':
+        expression = '1/(' + (expression || '0') + ')';
+        updateDisplay();
+        tryLivePreview();
+        break;
+      case 'negate':
+        expression = '(-1)*(' + (expression || '0') + ')';
+        updateDisplay();
+        tryLivePreview();
+        break;
+    }
+  });
+
+  document.addEventListener('keydown', (ev) => {
+    const allowed = '0123456789+-*/().%^';
+    if (allowed.includes(ev.key)){
+      expression += ev.key;
+      updateDisplay();
+      tryLivePreview();
+    } else if (ev.key === 'Enter'){
+      ev.preventDefault();
+      try {
+        const val = evaluateExpression(expression);
+        resultEl.textContent = formatNumber(val);
+        expression = formatNumber(val);
+        updateDisplay();
+      } catch(e){
+        resultEl.textContent = 'Erreur';
+      }
+    } else if (ev.key === 'Backspace'){
+      expression = expression.slice(0, -1);
+      updateDisplay();
+      tryLivePreview();
+    } else if (ev.key === 'Escape'){
+      expression = '';
+      resultEl.textContent = '0';
+      updateDisplay();
+    }
+  });
+
+  updateDisplay();
+</script>
+
+</body>
+</html>
